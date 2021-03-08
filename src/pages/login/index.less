@@ -1,0 +1,49 @@
+.main {
+  padding-top: 72px;
+  padding-bottom: 60px;
+  width: 328px;
+  margin: 0 auto;
+  text-align: center;
+
+  .logo {
+    font-weight: bold;
+    font-size: 20px;
+
+    img {
+      width: 110px;
+    }
+  }
+
+  input {
+    text-align: end;
+  }
+
+  .checkbox {
+    text-align: right;
+    margin: 20px 0;
+  }
+
+  :global {
+    .ant-input-affix-wrapper {
+      margin-top: 20px;
+    }
+  }
+}
+
+.foot {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  padding-bottom: 20px;
+  transform: translateX(-50%);
+  text-align: center;
+  color: fade(black, 50%);
+  background-color: white;
+
+  :global {
+    .anticon {
+      color: fade(black, 50%);
+    }
+  }
+}

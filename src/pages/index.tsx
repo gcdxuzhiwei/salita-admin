@@ -4,11 +4,15 @@ import {
   MenuFoldOutlined,
   DashboardOutlined,
   ApartmentOutlined,
+  TeamOutlined,
+  SwapOutlined,
+  FormOutlined,
 } from '@ant-design/icons';
+import { Popover, message, Menu, Spin } from 'antd';
 import { history } from 'umi';
-import { logo } from '@/utils/const';
+import { logo, getUmiCookie } from '@/utils/const';
 import styles from './index.less';
-import { Menu } from 'antd';
+import axios from 'axios';
 
 const { SubMenu } = Menu;
 
@@ -29,17 +33,40 @@ const myMenu = [
       },
     ],
   },
+  {
+    key: '/admin',
+    name: '管理员信息',
+    icon: <TeamOutlined />,
+    children: [
+      {
+        key: '/adminSetting',
+        name: '管理员设置',
+        needAuthor: true,
+      },
+      {
+        key: '/adminInfo',
+        name: '个人信息',
+      },
+    ],
+  },
 ];
 
 export default function IndexPage(props: any) {
   const [inlineCollapsed, setInlineCollapsed] = useState(false);
   const [openKeys, setOpenKeys] = useState([]);
+  const [adminInfo, setAdminInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleMenu = ({ key }: any) => {
     history.push(key);
   };
 
   useEffect(() => {
+    if (!getUmiCookie()) {
+      window.sessionStorage.setItem('shouldLogin', 'true');
+      history.push('/login');
+    }
     const hash = props.location.pathname;
     label: for (let i = 0; i < myMenu.length; i++) {
       const child = myMenu[i].children;
@@ -52,7 +79,48 @@ export default function IndexPage(props: any) {
         }
       }
     }
+    getInfo();
   }, []);
+
+  const getInfo = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.post('/api/admin/getRole');
+      if (data.role) {
+        setAdminInfo(data);
+        setLoading(false);
+        setIsAdmin(data.role === 2);
+      } else {
+        message.error(data.err);
+      }
+    } catch {
+      message.error('网络异常');
+    }
+  };
+
+  const renderContent = () => {
+    return (
+      <>
+        <div
+          className={styles.push}
+          onClick={() => {
+            setOpenKeys((v) => [...new Set([...v, '/admin'])]);
+            history.push('/adminInfo');
+          }}
+        >
+          <FormOutlined /> 修改信息
+        </div>
+        <div
+          className={styles.push}
+          onClick={() => {
+            history.push('/login');
+          }}
+        >
+          <SwapOutlined /> 切换用户
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -93,18 +161,42 @@ export default function IndexPage(props: any) {
       >
         {myMenu.map((v) =>
           v.children ? (
-            <SubMenu key={v.key} title={v.name}>
-              {v.children.map((c) => (
-                <Menu.Item key={c.key}>{c.name}</Menu.Item>
-              ))}
+            <SubMenu icon={v.icon} key={v.key} title={v.name}>
+              {v.children.map((c) =>
+                !c.needAuthor || isAdmin ? (
+                  <Menu.Item key={c.key}>{c.name}</Menu.Item>
+                ) : (
+                  <Menu.Item disabled key={c.key}>
+                    {c.name}
+                  </Menu.Item>
+                ),
+              )}
             </SubMenu>
           ) : (
-            <Menu.Item key={v.key}>{v.name}</Menu.Item>
+            <Menu.Item icon={v.icon} key={v.key}>
+              {v.name}
+            </Menu.Item>
           ),
         )}
       </Menu>
       <div style={{ flex: 1, position: 'relative' }}>
-        <div className={styles.title}></div>
+        <div className={styles.title}>
+          <Popover
+            content={renderContent}
+            getPopupContainer={(node) => node.parentNode}
+          >
+            <Spin spinning={loading}>
+              {adminInfo && (
+                <span className={styles.info}>
+                  <img src={'/public/' + adminInfo.avatar} />
+                  {(adminInfo.role === 2 ? '超级' : '普通') +
+                    '管理员: ' +
+                    adminInfo.name}
+                </span>
+              )}
+            </Spin>
+          </Popover>
+        </div>
         <div className={styles.main}>
           <div style={{ minWidth: 800 }}>{props.children}</div>
         </div>

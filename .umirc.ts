@@ -21,6 +21,11 @@ export default defineConfig({
   hash: true,
   routes: [
     {
+      path: '/login',
+      exact: true,
+      component: '@/pages/login',
+    },
+    {
       path: '/',
       exact: true,
       redirect: '/dashboard',
@@ -36,6 +41,14 @@ export default defineConfig({
         {
           path: 'teacherJoin',
           component: '@/pages/teacher/join',
+        },
+        {
+          path: 'adminSetting',
+          component: '@/pages/admin/setting',
+        },
+        {
+          path: 'adminInfo',
+          component: '@/pages/admin/info',
         },
       ],
     },
