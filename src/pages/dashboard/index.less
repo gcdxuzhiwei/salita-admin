@@ -1,0 +1,32 @@
+.top {
+  height: 200px;
+  background-color: white;
+  display: flex;
+
+  .left {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .tool {
+      position: absolute;
+      text-align: center;
+      width: 100%;
+      top: 10px;
+      left: 50%;
+      transform: translateX((-50%));
+    }
+  }
+
+  .right {
+    flex: 1;
+    display: flex;
+
+    & > div {
+      flex: 1;
+    }
+  }
+}

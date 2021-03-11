@@ -198,7 +198,12 @@ export default function IndexPage(props: any) {
           </Popover>
         </div>
         <div className={styles.main}>
-          <div style={{ minWidth: 800 }}>{props.children}</div>
+          <div style={{ minWidth: 800 }}>
+            {props.children &&
+              React.cloneElement(props.children, {
+                inlineCollapsed,
+              })}
+          </div>
         </div>
       </div>
     </div>
