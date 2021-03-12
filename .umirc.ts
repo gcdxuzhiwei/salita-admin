@@ -11,7 +11,7 @@ export default defineConfig({
       changeOrigin: true,
     },
     '/public': {
-      target: 'http://www.xuzhiwei.icu/',
+      target: 'http://xzw.link/',
       changeOrigin: true,
     },
   },
