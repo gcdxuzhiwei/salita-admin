@@ -108,6 +108,7 @@ function Join() {
       rowKey={(record) => record.userId}
       columns={columns.current}
       dataSource={dataSource}
+      scroll={{ y: 'calc(100vh - 190px)', x: false }}
       pagination={{
         current: page,
         pageSize: 10,
