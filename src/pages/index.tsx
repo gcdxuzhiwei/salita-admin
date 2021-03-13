@@ -57,6 +57,7 @@ export default function IndexPage(props: any) {
   const [adminInfo, setAdminInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [login, setLogin] = useState(false);
 
   const handleMenu = ({ key }: any) => {
     history.push(key);
@@ -66,20 +67,22 @@ export default function IndexPage(props: any) {
     if (!getUmiCookie()) {
       window.sessionStorage.setItem('shouldLogin', 'true');
       history.push('/login');
-    }
-    const hash = props.location.pathname;
-    label: for (let i = 0; i < myMenu.length; i++) {
-      const child = myMenu[i].children;
-      if (child) {
-        for (let j = 0; j < child.length; j++) {
-          if (child[j].key === hash) {
-            setOpenKeys([myMenu[i].key] as never);
-            break label;
+    } else {
+      setLogin(true);
+      const hash = props.location.pathname;
+      label: for (let i = 0; i < myMenu.length; i++) {
+        const child = myMenu[i].children;
+        if (child) {
+          for (let j = 0; j < child.length; j++) {
+            if (child[j].key === hash) {
+              setOpenKeys([myMenu[i].key] as never);
+              break label;
+            }
           }
         }
       }
+      getInfo();
     }
-    getInfo();
   }, []);
 
   const getInfo = async () => {
@@ -199,7 +202,8 @@ export default function IndexPage(props: any) {
         </div>
         <div className={styles.main}>
           <div style={{ minWidth: 800 }}>
-            {props.children &&
+            {login &&
+              props.children &&
               React.cloneElement(props.children, {
                 inlineCollapsed,
               })}
