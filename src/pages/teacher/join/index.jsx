@@ -76,7 +76,11 @@ function Join() {
             userId: record.userId,
           });
           message.destroy();
-          message.success('操作成功');
+          if (message.success) {
+            message.success('操作成功');
+          } else {
+            message.error(message.err);
+          }
           getTable();
         } catch {
           message.error('网络异常');
