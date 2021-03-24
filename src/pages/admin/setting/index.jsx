@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input, Radio, Button, message, Modal, Table } from 'antd';
+import { Input, Radio, Button, message, Modal, Table, Spin } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 import { VariableSizeGrid as Grid } from 'react-window';
+import moment from 'moment';
 import ResizeObserver from 'rc-resize-observer';
 import classNames from 'classnames';
 import axios from 'axios';
@@ -12,6 +14,26 @@ function AdminSetting() {
   const [password1, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
   const [remark, setRemark] = useState('');
+  const [tableHeight, setTableHeight] = useState(300);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const tableDOM = useRef(null);
+
+  useEffect(() => {
+    setHeight();
+    getData();
+
+    window.addEventListener('resize', setHeight);
+
+    return () => {
+      window.removeEventListener('resize', setHeight);
+    };
+  }, []);
+
+  const setHeight = () => {
+    setTableHeight(tableDOM.current.clientHeight - 55);
+  };
 
   const handleAdd = () => {
     if (!userName || !password1 || !password2) {
@@ -68,68 +90,48 @@ function AdminSetting() {
     { title: '操作', dataIndex: 'something' },
   ];
 
-  const data = [
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-    {
-      userName: 'dasd',
-      role: '1',
-      remark: 'dasfd',
-      createTime: 'asfasf',
-    },
-  ];
+  const getData = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.post('/api/admin/list');
+      data.arr.forEach((v) => {
+        v.role = v.role === 2 ? '超级管理员' : '普通管理员';
+        v.createTime = moment(v.createTime).format('YYYY/MM/DD HH:mm');
+      });
+      setData(data.arr);
+      setLoading(false);
+    } catch {
+      message.error('网络异常');
+    }
+  };
+
+  const deleteAdmin = async (item) => {
+    try {
+      message.loading();
+      const { data } = await axios.post('/api/admin/deleteAdmin', {
+        adminId: item.adminId,
+      });
+      message.destroy();
+      if (data.success) {
+        message.success('删除成功');
+        getData();
+      } else {
+        message.error(data.err);
+      }
+      getData();
+    } catch {
+      message.error('网络异常');
+    }
+  };
+
+  const hanleDelete = (item) => {
+    Modal.confirm({
+      content: `确认信息: ${item.userName} ${item.role}`,
+      onOk: () => {
+        deleteAdmin(item);
+      },
+    });
+  };
 
   return (
     <>
@@ -178,7 +180,16 @@ function AdminSetting() {
           提交
         </Button>
       </div>
-      <VirtualTable columns={columns} dataSource={data} scroll={{ y: 300 }} />
+      <div ref={tableDOM} className={styles.table}>
+        <Spin spinning={loading}>
+          <VirtualTable
+            hanleDelete={hanleDelete}
+            columns={columns}
+            dataSource={data}
+            scroll={{ y: tableHeight }}
+          />
+        </Spin>
+      </div>
     </>
   );
 }
@@ -186,7 +197,7 @@ function AdminSetting() {
 export default AdminSetting;
 
 function VirtualTable(props) {
-  const { columns, scroll } = props;
+  const { columns, scroll, hanleDelete } = props;
   const [tableWidth, setTableWidth] = useState(0);
 
   const widthColumnCount = columns.filter(({ width }) => !width).length;
@@ -217,7 +228,7 @@ function VirtualTable(props) {
   });
 
   const resetVirtualGrid = () => {
-    gridRef.current.resetAfterIndices({
+    gridRef.current?.resetAfterIndices({
       columnIndex: 0,
       shouldForceUpdate: false,
     });
@@ -256,7 +267,17 @@ function VirtualTable(props) {
             })}
             style={style}
           >
-            {rawData[rowIndex][mergedColumns[columnIndex].dataIndex]}
+            {rawData[rowIndex][mergedColumns[columnIndex].dataIndex] || (
+              <span
+                style={{ color: 'red', cursor: 'pointer' }}
+                onClick={() => {
+                  hanleDelete(rawData[rowIndex]);
+                }}
+              >
+                删除
+                <CloseOutlined style={{ marginLeft: 3 }} />
+              </span>
+            )}
           </div>
         )}
       </Grid>

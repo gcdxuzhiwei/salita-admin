@@ -206,6 +206,8 @@ export default function IndexPage(props: any) {
               props.children &&
               React.cloneElement(props.children, {
                 inlineCollapsed,
+                adminInfo,
+                setAdminInfo,
               })}
           </div>
         </div>

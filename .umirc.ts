@@ -6,6 +6,10 @@ export default defineConfig({
   },
   title: '家教服务平台后台管理',
   proxy: {
+    '/api/upload': {
+      target: 'http://xzw.link/',
+      changeOrigin: true,
+    },
     '/api': {
       target: 'http://127.0.0.1:7001/',
       changeOrigin: true,
