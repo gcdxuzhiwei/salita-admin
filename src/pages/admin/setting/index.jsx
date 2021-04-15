@@ -76,6 +76,7 @@ function AdminSetting() {
         setPassword1('');
         setPassword2('');
         setRemark('');
+        getData();
       }
     } catch {
       message.fail('网络异常');
