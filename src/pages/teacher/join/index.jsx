@@ -14,7 +14,7 @@ function Join() {
     getTable();
   }, [page]);
 
-  const columns = useRef([
+  const columns = [
     {
       title: '手机号',
       dataIndex: 'phone',
@@ -61,7 +61,7 @@ function Join() {
         </>
       ),
     },
-  ]);
+  ];
 
   const handleClickIcon = (close, record) => {
     const option = {
@@ -110,7 +110,7 @@ function Join() {
       className={styles.table}
       loading={loading}
       rowKey={(record) => record.userId}
-      columns={columns.current}
+      columns={columns}
       dataSource={dataSource}
       scroll={{ y: 'calc(100vh - 190px)', x: false }}
       pagination={{
